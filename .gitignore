@@ -1,0 +1,16 @@
+.metadata
+.recommenders
+.sonarlint
+/moderationcheck/.classpath
+target
+.gradle
+.settings
+bin
+build
+/moderationcheck/.project
+/moderationcheck/packaged.yaml
+/facecheck-server/.classpath
+/facecheck-server/.project
+/facecheck-server/.settings
+/facecheck-server/node_modules
+/facecheck-server/target

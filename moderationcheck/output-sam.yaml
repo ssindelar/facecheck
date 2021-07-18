@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS Serverless Jersey API - de.facecheck::moderationcheck
+Globals:
+  Api:
+    EndpointConfiguration: REGIONAL
+Resources:
+  ModerationcheckFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: de.facecheck.StreamLambdaHandler::handleRequest
+      Runtime: java8
+      CodeUri: s3://facecheck-deploy/355a15c68ae4f57d95a582d7cee14422
+      MemorySize: 512
+      Policies:
+      - AWSLambdaBasicExecutionRole
+      - AmazonRekognitionReadOnlyAccess
+      Timeout: 30
+      Events:
+        GetResource:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: any
+Outputs:
+  ModerationcheckApi:
+    Description: URL for application
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/moderation
+    Export:
+      Name: ModerationcheckApi

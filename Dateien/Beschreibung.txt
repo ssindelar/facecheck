@@ -1,0 +1,293 @@
+API Dokumentation
+
+Testversion der API zum Analyisieren von Profilbildern.
+REST-Endpunkt: POST https://api.wupu.de/facecheck
+UI für Tests: http://test.wupu.de/imagetest
+
+
+Anfragen
+
+Um die API anzufragen muss entweder das Bild selbst oder ein Link zu dem Bild übergeben werden. 
+Das Bild darf maximal 5 MB groß sein und muss im JPEG oder PNG Fromat sein.
+Welches Bild untersucht werden soll wird als JSON-RequestBody der Anfrage mitgegeben.
+
+Beispielanfragen
+
+Link zum Bild:
+{
+	"link": "https://dich-mit-stich.de/magazin/wp-content/uploads/2019/04/Japanische-Tattoos-750x410.jpeg"
+}
+
+
+Bild übergeben
+{
+	"image": "{Bilddatei als Base64 enkodiert}"
+}
+
+Antworten
+
+Nach etwa 2-3 Sekunden ist die Analyse fertig und man erhält eine JSON-Antwort.
+Die Antwort ist in mehrere Teile gegliedert.
+Wiederkehrende Konzepte sind dabei "recommandation" und "confidence".
+
+Recommendation
+Vorschlag wie das Bild behandelt werden soll. Bereiche erhalten eine einzelne Beurteilung und zusätzlich gibt es eine Gesamtbewertung.
+Mögliche Werte sind: ALLOW, CHECK und DENY
+Dabei ist die Gesamtbewertung immer der schlechteste Wert aller Teilbereiche.
+
+Confidence
+Gibt an wie sicher die Erkennung ist. Je höher der Wert um so sicherer ist sich der Algorithmus mit dem Ergebnis.
+
+Webdetect
+Ist das Bild irgendwo sonst im Internet zu finden. Dabei wird auch berücksichtigt ob das Bild aus einem anderen Bild ausgeschnitten wurde.
+Angeben ist hier die URL und der Titel der Webseite sowie die URL des Bildes.
+
+Skala: 0-100.
+
+
+Moderation
+Hier wird auf unangemessene Inhalte geprüft. Folgende Kategorieren können erkannt werden
+- Explicit Nudity: Nacktheit, Sexuelle Aktivitäten, Erwachsenenspielzeug
+- Suggestive: Badebekleidung, Unterwüsche, Freizügige Kleidung
+- Violence: Gewaltdarstellungen, Waffen, Selbstverletzung
+- Visually Disturbing: Leichen, Hinrichtungen, Ausgemergelte Körper
+
+Labels
+Liste mit Erkannten Gegenständen und Eigenschaften.
+
+Face
+Informationen über Gesicher auf dem Foto. Bei Bedarf können hier auch Informationen zu allen Gesichtern zurückgegeben werden.
+Derzeit wird nur das größte Gesicht berücksichtigt.
+
+Texts
+Erkannte Texte auf dem Bild. Der erste Eintrag ist immer der gesamte erkannte Text.
+
+
+Beispielantwort:
+Die mit # kennzeichneten Inhalte sind Kommentare und nicht in der wirklichen Antwort enthalten.
+{
+  # Eindeutige ID des Bildes
+  "imageId": "teJ2I/Q8B8K7AtgA3szUxRxgmbde/a1ef2QJ1ysCnts=",
+  # Gesamtbewertung des Bildes. DENY weil der Bereich "moderation" DENY ist.
+  "recommendation": "DENY",
+  
+  # Unangemessene Inhalte
+  "moderation": {
+    "recommendation": "DENY",
+	# Höchste Confidence wert aller erkannten unangemessene Inhalte.
+    "level": 96.50826263427734,
+    "issues": [
+      {
+        "name": "Suggestive",
+        "confidence": 96.50826263427734
+      }
+    ]
+  },
+  
+  # Verschiedene Eigenschaften/Objekte
+  "labels": [
+    {
+      "name": "Person",
+      "confidence": 99.1597900390625
+    },
+    {
+      "name": "Human",
+      "confidence": 99.1597900390625
+    },
+    {
+      "name": "Animal",
+      "confidence": 92.53604888916016
+    },
+    {
+      "name": "Mammal",
+      "confidence": 92.53604888916016
+    },
+    {
+      "name": "Canine",
+      "confidence": 92.53604888916016
+    },
+    {
+      "name": "Pet",
+      "confidence": 89.46929168701172
+    },
+    {
+      "name": "Canidae",
+      "confidence": 79.00602722167969
+    },
+    {
+      "name": "Dog",
+      "confidence": 78.46721649169922
+    },
+    {
+      "name": "Puppy",
+      "confidence": 76.82923889160156
+    },
+    {
+      "name": "Face",
+      "confidence": 76.77355194091797
+    },
+    {
+      "name": "Hound",
+      "confidence": 70.1204833984375
+    },
+    {
+      "name": "Sporting Group",
+      "confidence": 68.74697875976562
+    },
+    {
+      "name": "People",
+      "confidence": 67.10090637207031
+    },
+    {
+      "name": "Doctor",
+      "confidence": 62.70144271850586
+    },
+    {
+      "name": "Wildlife biologist",
+      "confidence": 60.272987365722656
+    },
+    {
+      "name": "Photography",
+      "confidence": 60.15959930419922
+    },
+    {
+      "name": "Photo",
+      "confidence": 60.15959930419922
+    },
+    {
+      "name": "Child",
+      "confidence": 57.3305549621582
+    },
+    {
+      "name": "Dog breed",
+      "confidence": 56.96454620361328
+    },
+    {
+      "name": "Dating",
+      "confidence": 56.0975456237793
+    },
+    {
+      "name": "Facial hair",
+      "confidence": 55.528892517089844
+    },
+    {
+      "name": "Puppy love",
+      "confidence": 54.92655563354492
+    },
+    {
+      "name": "Carnivore",
+      "confidence": 53.53264617919922
+    }
+  ],
+  
+  # Informationen zu dem Gesicht des Profilbildes
+  "face": {
+    "recommandation": "CHECK",
+	# Soviele Gesichter sind auf dem Bild insgesamt zu sehen
+    "faceCount": 2,
+    "mainFace": {
+      "ageRange": {
+        "low": 23,
+        "high": 37
+      },
+      "smile": {
+        "value": false,
+        "confidence": 82.82515716552734
+      },
+      "gender": {
+        "name": "Male",
+        "confidence": 94.09842681884766
+      },
+      "glasses": {
+        "value": false,
+        "confidence": 99.68256378173828
+      },
+      "sunGlasses": {
+        "value": false,
+        "confidence": 99.8271713256836
+      },
+      "eyesOpen": {
+        "value": false,
+        "confidence": 70.14167022705078
+      },
+      "confidence": 100.0
+    }
+  },
+  
+  # Erkannte Texte
+  "texts": {
+    "recommendation": "CHECK",
+    "texts": [
+      "Tipps für\ndas perfekte\nProfilfoto\n",
+      "Tipps",
+      "für",
+      "das",
+      "perfekte",
+      "Profilfoto"
+    ]
+  },
+  
+  # Prüfung ob das Bild sonst wo im Internet existiert
+  "webDetect": {
+    "foundOnWeb": true,
+    "recommendation": "CHECK",
+    "websites": [
+      {
+        "websiteURL": "https://unsplash.com/photos/Bs4BebcmLec",
+        "pageTitle": "My <b>girlfriend</b> was yelling âHey look a... | HD photo by Per LÃ¶Ã¶v ...",
+        "imageURL": "https://images.unsplash.com/photo-1536072937452-bb2b0eb8d8df?ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=60"
+      },
+      {
+        "websiteURL": "https://dopepet.com/about-2/",
+        "pageTitle": "About - Dope Pet",
+        "imageURL": "https://dopepet.com/wp-content/uploads/elementor/thumbs/s-a-r-a-h-s-h-a-r-p-973488-unsplash-o01eo8qbtpi4rffoawjeaf84811ndaud39tz48p5ow.jpg"
+      },
+      {
+        "websiteURL": "https://spark.adobe.com/templates/cards/christmas/",
+        "pageTitle": "Best Free Christmas Card Templates and Ideas | Adobe Spark",
+        "imageURL": "https://cdn.cp.adobe.io/content/2/rendition/582c9c41-de90-4be1-bffe-f6812be77460/artwork/bf2afef7-4e6e-4bfe-9ffe-74db59087c5f/version/0/format/jpg/dimension/width/size/300"
+      },
+      {
+        "websiteURL": "https://spark.adobe.com/templates/topic/holiday/",
+        "pageTitle": "Free Customizable Holiday Templates | Adobe Spark",
+        "imageURL": "https://cdn.cp.adobe.io/content/2/rendition/8d66bd36-47ef-4015-a315-5cf8b7607e76/artwork/5c40ed25-d458-4f36-9a47-e6d978ac59dd/version/0/format/jpg/dimension/width/size/240"
+      },
+      {
+        "websiteURL": "https://spark.adobe.com/templates/topic/family/",
+        "pageTitle": "Free Customizable Templates for Families | Adobe Spark",
+        "imageURL": "https://cdn.cp.adobe.io/content/2/rendition/8d66bd36-47ef-4015-a315-5cf8b7607e76/artwork/5c40ed25-d458-4f36-9a47-e6d978ac59dd/version/0/format/jpg/dimension/width/size/240"
+      },
+      {
+        "websiteURL": "https://www.newmexicankennels.com/blog/a-look-at-the-health-benefits-of-dog-ownership/",
+        "pageTitle": "A Look at The Health Benefits of Dog Ownership - New Mexican ...",
+        "imageURL": "https://www.newmexicankennels.com/wp-content/uploads/s-a-r-a-h-s-h-a-r-p-973488-unsplash.jpg"
+      },
+      {
+        "websiteURL": "https://unsplash.com/photos/5ylV-khwM9s",
+        "pageTitle": "Ottawa dog | HD photo by Anita Peeples (@anitapeeples) on ...",
+        "imageURL": "https://images.unsplash.com/photo-1536072937452-bb2b0eb8d8df?ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=60"
+      },
+      {
+        "websiteURL": "https://unsplash.com/photos/gYerrCSUoT0",
+        "pageTitle": "Canine, mammal, animal and pet | HD photo by Nathalie SPEHNER ...",
+        "imageURL": "https://images.unsplash.com/photo-1536072937452-bb2b0eb8d8df?ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=60"
+      },
+      {
+        "websiteURL": "https://unsplash.com/photos/B3hxa3utKpI",
+        "pageTitle": "Pink panther. | HD photo by Shubhesh Aggarwal (@shubhesh) on ...",
+        "imageURL": "https://images.unsplash.com/photo-1536072937452-bb2b0eb8d8df?ixlib=rb-1.2.1&auto=format&fit=crop&w=750&q=60"
+      },
+      {
+        "websiteURL": "https://www.daniellamarinosphotography.com/engagements",
+        "pageTitle": "Gloucestershire Engagement Photographer | UK, Greece &amp; Zakynthos",
+        "imageURL": "https://www.daniellamarinosphotography.com/v/p/nB9u5psPyPQJafUPMZH50AMY-daniellamarinos0055.jpg"
+      }
+    ]
+  },
+  
+  # Verschiedene zusätzliche Infos die bei Bedarf erweitert werden können
+  # z.B.: Ist ein Tier zu sehen 
+  "animalVisible": true,
+  # Unsere Einschätzzung ob es ein gutes Profilbild ist.
+  "goodProfilePicture": false
+}
